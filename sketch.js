@@ -1,14 +1,11 @@
 let mouseStatus = 0;
-let canvas = document.querySelector("#canvas");
-const squareSize = 16;
-const gridSize = 32;
 
 document.body.onmousedown = function (clickDown) {
     b = clickDown.button;
     if (b) b <<= 1;
     else b |= 1;
     mouseStatus |= b;
-    if (canvas.contains(clickDown.target)) mouseOverListener(clickDown);
+    if (document.querySelector("#canvas").contains(clickDown.target)) mouseOverListener(clickDown);
     return false;
 }
 
@@ -20,7 +17,6 @@ document.body.onmouseup = function (clickUp) {
     return false;
 }
 
-
 function mouseOverListener(e) {
     let currentOpacity = +e.target.style.opacity;
     if (mouseStatus === 1) {
@@ -30,17 +26,19 @@ function mouseOverListener(e) {
         e.target.style.opacity = currentOpacity - 0.1 < 0 ? 0 : currentOpacity - 0.1;
     }
 }
-function init() {
-    document.addEventListener('contextmenu', e => { e.preventDefault(); return false; })
-    canvas.style.backgroundColor = "#fff";
-    canvas.style.width = canvas.style.height = `100px`;
-    canvas.style.display = "flex";
-    canvas.style.flexDirection = "column";
 
-    for (let rowId = 0; rowId < gridSize; rowId++) {
+function createCanvas(resolution) {
+    let oldCanvas = document.querySelector("#canvas");
+    oldCanvas.remove();
+    let canvas = document.createElement('div');
+    canvas.id = "canvas";
+    canvas.style.display = "flex";
+    canvas.style.flexDirection = "column"
+    for (let rowId = 0; rowId < resolution; rowId++) {
         let row = document.createElement('div');
         row.style.display = "flex";
-        for (let colId = 0; colId < gridSize; colId++) {
+        row.style.flex = 'auto'
+        for (let colId = 0; colId < resolution; colId++) {
             let square = document.createElement('div');
             square.style.flex = 'auto';
             square.style.backgroundColor = "#000";
@@ -48,9 +46,26 @@ function init() {
             square.addEventListener('mouseover', mouseOverListener);
             row.append(square);
         }
-        row.style.flex = 'auto'
         canvas.append(row);
-    }
+    }   
+    let container = document.querySelector(".container")
+    container.append(canvas)
+
+}
+
+function changeCanvasButtonListener() {
+    let resolution = prompt("What should be the new resolution?\nEnter a single number, 100 is the maximum.");
+    createCanvas(resolution > 100 ? 100: resolution);
+}
+
+document.querySelector("#resize").addEventListener('click', changeCanvasButtonListener);
+
+function init() {
+    document.addEventListener('contextmenu', e => { e.preventDefault(); return false; })
+    canvas.style.backgroundColor = "#fff"
+    canvas.style.display = "flex";
+    canvas.style.flexDirection = "column";
+    createCanvas(32);
 }
 
 init();
